@@ -1,37 +1,39 @@
 const fs = require("fs");
 
-const wordNum = {
-  "one": 1,
-  "two": 2,
-  "three": 3,
-  "four": 4,
-  "five": 5,
-  "six": 6,
-  "seven": 7,
-  "eight": 8,
-  "nine": 9,
-};
-const words = Array.from(Object.keys(wordNum));
+const INPUT = false ? "./sample_input1" : "./day1.txt"
+const file = fs.readFileSync(INPUT, { encoding: "utf8" });
 
-fs.readFile("./day1.txt", (err, data) => {
-  data = data.toString().trim();
+const lines = file.split("\n");
+lines.pop();
+let sum1 = 0;
+let sum2 = 0;
 
-  const lines = data.split("\n");
+const digits = ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine"]
+const wordToInt = digits.reduce((acc, w, i) => ({...acc, [w]: i + 1}), {})
 
-  let calibration = 0;
-  for (let line of lines) {
-    let a = convertToDigits(line);
-    console.log(a);
-    const numbers = Array.from(line).map(char => {
-      if (char.charCodeAt(0) >= 48 && char.charCodeAt(0) <= 57) return char;
-      else return null;
-    }).filter(char => char != null);
+const convertToInt = (s) => {
+  if (digits.includes(s)) return wordToInt[s]
+  else return Number.parseInt(s)
+}
 
-    calibration += Number.parseInt(`${numbers[0]}${numbers[numbers.length - 1]}`);
+const getCalibrationValue = (pattern, line) => {
+  const matches = [...line.matchAll(pattern)];
+  if (matches.length > 0) {
+    const fnum = convertToInt(matches[0][1])
+    const lnum = convertToInt(matches[matches.length - 1][1])
+    return fnum * 10 + lnum
   }
-  console.log(calibration);
+  return 0
+}
+
+const re1 = /(\d)/g
+const re2 = /(?=(\d|one|two|three|four|five|six|seven|eight|nine))/g
+lines.forEach((line) => {
+  const cv1 = getCalibrationValue(re1, line)
+  const cv2 = getCalibrationValue(re2, line)
+  sum1 += cv1
+  sum2 += cv2
 })
 
-function convertToDigits(str) {
-
-}
+console.log("Part 1 Sum", sum1)
+console.log("Part 2 Sum", sum2)
